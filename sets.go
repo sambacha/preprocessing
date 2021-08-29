@@ -12,13 +12,13 @@ type rw_set struct {
 	write_set map[common.Address]bool
 	// contains indexes of transactions
 	// that write to the same address as this transaction read
-	cross_set []int
+	cross_set [][2]int
 }
 
 func new_set_addr() *rw_set {
 	read_set := make(map[common.Address]bool)
 	write_set := make(map[common.Address]bool)
-	cross_set := make([]int, 0)
+	cross_set := make([][2]int, 0)
 	return &rw_set{read_set, write_set, cross_set}
 }
 
@@ -28,9 +28,16 @@ func (set *rw_set) add_cross(txn_idx int, write_set *map[common.Address]bool) {
 		// if read set of this transaction has an address
 		// that other transaction writes to it
 		if _, ok := set.read_set[addr]; ok {
-			set.cross_set = append(set.cross_set, txn_idx)
+			set.cross_set = append(set.cross_set, [2]int{txn_idx, READ})
+		}
+
+		// if write set of this transaction has an address
+		// that other transaction writes to it
+		if _, ok := set.write_set[addr]; ok {
+			set.cross_set = append(set.cross_set, [2]int{txn_idx, WRITE})
 		}
 	}
+
 }
 
 func (set *rw_set) add(addr common.Address, mode int) {
