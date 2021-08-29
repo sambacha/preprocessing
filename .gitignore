@@ -1,0 +1,5 @@
+bin
+p_test.py
+__*.go
+/*.svg
+*.dot
